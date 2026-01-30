@@ -5,10 +5,10 @@
 #include "vector.h"
 
 typedef struct {
-    Vector3 position;
-    Vector3 velocity;
-    Vector3 acceleration;
-    Vector3 force;
+    V3 position;
+    V3 velocity;
+    V3 acceleration;
+    V3 force;
 
     // How fast object loses speed (1 = 0 loss)
     real damping;

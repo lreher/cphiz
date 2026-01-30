@@ -7,22 +7,22 @@ CFLAGS = -Iinclude -Wall -Wextra -std=c11 -Wno-deprecated-declarations
 BREW_PREFIX := $(shell brew --prefix)
 
 # GLFW include & link flags
-GLFW_CFLAGS = -I$(BREW_PREFIX)/include
-GLFW_LIBS = -L$(BREW_PREFIX)/lib \
-            -lglfw \
-            -framework OpenGL \
-            -framework Cocoa \
-            -framework IOKit \
-            -framework CoreVideo
+RAYLIB_CFLAGS = -I$(BREW_PREFIX)/include
+RAYLIB_LIBS = -L$(BREW_PREFIX)/lib \
+              -lraylib \
+              -framework OpenGL \
+              -framework Cocoa \
+              -framework IOKit \
+              -framework CoreVideo
 
-SRCS = src/main.c src/vector.c src/particle.c src/camera.c
-OBJS = build/main.o build/vector.o build/particle.o build/camera.o
+SRCS = src/main.c src/vector.c src/particle.c src/camera.c src/input.c
+OBJS = build/main.o build/vector.o build/particle.o build/camera.o build/input.o
 
 program: $(OBJS)
-	$(CC) $(OBJS) -o build/program $(GLFW_LIBS)
+	$(CC) $(OBJS) -o build/program $(RAYLIB_LIBS)
 
 build/%.o: src/%.c
-	$(CC) $(CFLAGS) $(GLFW_CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) $(RAYLIB_CFLAGS) -c $< -o $@
 
 clean:
 	rm -f build/*.o build/program

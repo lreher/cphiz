@@ -1,8 +1,19 @@
-#pragma once
+#ifndef CAMERA_H
+#define CAMERA_H
 
+#include "raylib.h"
+
+// Camera struct
 typedef struct {
-    float x, y, z;      // position
-    float pitch, yaw;   // rotation (degrees)
-} Camera;
+    Vector3 position;
+    float yaw;
+    float pitch;
+} CameraControl;
 
-void camera_apply(const Camera* cam);
+// Initialize camera
+void camera_init(CameraControl *cam, Vector3 position);
+
+// Update camera target for raylib
+void camera_apply(Camera3D *cam3d, CameraControl *ctrl);
+
+#endif

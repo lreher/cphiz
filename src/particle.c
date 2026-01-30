@@ -10,7 +10,7 @@ void particle_integrate (Particle* particle, real duration) {
     v3_add_scaled(&particle->position, particle->velocity, duration);
 
     // Calculate acceleration from force vector
-    Vector3 resultingAcc = particle->acceleration;
+    V3 resultingAcc = particle->acceleration;
     v3_add_scaled(&resultingAcc, particle->force, particle->inverseMass);
 
     // Update resulting velocity from acceleration
