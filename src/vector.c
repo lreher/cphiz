@@ -149,6 +149,11 @@ void v3_normalize(V3* v) {
     }
 }
 
+// V3 to Vector3 
+Vector3 V3_TO_RAYLIB(V3 v) {
+    return (Vector3){ v.x, v.y, v.z };
+}
+
 // PRINT
 void v3_print(const V3 v) {
     // Print the vector in the format "(x, y, z)"

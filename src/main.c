@@ -4,20 +4,44 @@
 #include "particle.h"
 #include <camera.h>
 #include <input.h>
+#include <utils.h>
 
 #include <math.h>
 
 #include "raylib.h"
+#define RAYGUI_IMPLEMENTATION
+#include "raygui.h"
 
+#define MAX_PARTICLES 10000
+
+// Slider Values
+float explosionForceSlider = 20.0f;
+float particlesSlider = 100.0f;
+float sphereSizeSlider = 0.5f;
+
+void resetParticle(Particle* p) {
+    p->position = (V3){0.0f, 1.0f, 0.0f};  // starting slightly above ground
+    p->velocity = (V3){0.0f, 0.0f, 0.0f};
+    p->force = (V3){ 
+        rand_float(-explosionForceSlider, explosionForceSlider), 
+        rand_float(explosionForceSlider / 2, explosionForceSlider),
+        rand_float(-explosionForceSlider, explosionForceSlider),
+    }; 
+    p->acceleration = (V3){0.0f, -1.0f, 0.0f}; // gravity
+    p->inverseMass = rand_float(0.3f, 1.2f);   // mass = 2kg
+    p->damping = 0.99f;      // slight damping
+}
 
 int main(void) {
+    init_random();
+    SetTraceLogLevel(LOG_NONE); // set no logging
 
     // Window
     InitWindow(1200, 800, "Physics Demo");
 
     // Camera
     CameraControl cameraCtrl;
-    camera_init(&cameraCtrl, (Vector3){0, 2, 6});
+    camera_init(&cameraCtrl, (Vector3){0, 2, 10});
 
     Camera3D cam3d = {0};
     cam3d.position = cameraCtrl.position;
@@ -25,16 +49,32 @@ int main(void) {
     cam3d.fovy     = 60.0f;
     cam3d.projection = CAMERA_PERSPECTIVE;
 
+    // Create Physics Particles
+    Particle p1;
+    resetParticle(&p1);
+
+    Particle particles[MAX_PARTICLES];
+    for (int i = 0; i < (int)particlesSlider; i++) {
+        resetParticle(&particles[i]);
+    }
+
     // Set FPS
     SetTargetFPS(60);
     double lastTime = GetTime();
 
     while (!WindowShouldClose()) {
+        int numParticles = (int)particlesSlider;
 
-        // Delta time
-        double now = GetTime();
-        float dt = (float)(now - lastTime);
-        lastTime = now;
+        // Handle input
+        if (IsKeyPressed(KEY_SPACE)) {
+            for (int i = 0; i < numParticles; i++) {
+                Particle *p = &particles[i];
+                resetParticle(p);
+            }
+        }
+
+        // Get delta time
+        float dt = GetFrameTime();
 
         // Keyboard input
         process_input(&cameraCtrl, dt);
@@ -43,19 +83,61 @@ int main(void) {
         cam3d.position = cameraCtrl.position;
         camera_apply(&cam3d, &cameraCtrl);
 
-        // Render
+        /* Render */ 
         BeginDrawing();
-        ClearBackground(RAYWHITE);
+        ClearBackground(BLACK);
 
+        // Labels
+        GuiSetStyle(LABEL, TEXT_COLOR_NORMAL, ColorToInt(GREEN));
+
+        GuiLabel((Rectangle){ 50, 40, 100, 20 }, "Explosion Force");
+        GuiSlider((Rectangle){ 50, 60, 200, 20 }, "1", "50", &explosionForceSlider, 1.0f, 100.0f);
+
+        GuiLabel((Rectangle){ 50, 100, 100, 20 }, "Particles");
+        GuiSlider((Rectangle){ 50, 120, 200, 20 }, "1", "10000", &particlesSlider, 1.0f, (float)MAX_PARTICLES);
+
+        GuiLabel((Rectangle){ 50, 160, 100, 20 }, "Sphere Size");
+        GuiSlider((Rectangle){ 50, 180, 200, 20 }, "0.1", "2", &sphereSizeSlider, 0.1f, 2.0f);
+
+        // Spheres
         BeginMode3D(cam3d);
 
-            DrawGrid(20, 1);
-            DrawSphere((Vector3){0, 1, 0}, 1.0f, LIGHTGRAY);
-            DrawSphereWires((Vector3){0, 1, 0}, 1.0f, 32, 32, GRAY);
+        Mesh sphere = GenMeshSphere(sphereSizeSlider, 8, 8); // low res
+        Model sphereModel = LoadModelFromMesh(sphere);
+
+        for (int i = 0; i < numParticles; i++) {
+            Particle *p = &particles[i];
+            
+            particle_integrate(p, lastTime);
+
+            float radius = 1.0f / p->inverseMass / 10.0f;
+
+            real totalSpeed = v3_magnitude(&p->velocity) * 30;
+
+            if (totalSpeed > 255) totalSpeed = 255;
+            Color color = { 255, totalSpeed, 0, 255 };
+
+            DrawModel(sphereModel, V3_TO_RAYLIB(p->position), radius, color);
+
+            // bounce
+            if (particles[i].position.y < 0.0f 
+              && particles[i].position.x <= 50.0f
+              && particles[i].position.x >= -50.0f
+              && particles[i].position.z <= 50.0f
+              && particles[i].position.z >= -50.0f) {
+                particles[i].position.y = 0.0f; // stay on floor
+                particles[i].velocity.y *= -0.5f; // bounce with damping
+                particles[i].velocity.x *= 0.8f; // bounce with damping
+                particles[i].velocity.z *= 0.8f; // bounce with damping
+            }
+        }
+
+        DrawGrid(100, 1);
+        // DrawPlane((Vector3){0.0f, 0.0f, 0.0f}, (Vector2){50.0f, 50.0f}, WHITE);
 
         EndMode3D();
-
-        DrawText("Funky Physics Demo", 10, 10, 20, DARKGRAY);
+        
+        DrawText("Funky Physics Demo", 10, 10, 20, GREEN);
 
         EndDrawing();
     }

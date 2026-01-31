@@ -5,6 +5,14 @@ void process_input(CameraControl *ctrl, float dt) {
     float moveSpeed = 5.0f * dt;
     float rotSpeed  = 1.5f * dt;
 
+    // Set speed
+    if (IsKeyDown(KEY_LEFT_SHIFT)) {
+        moveSpeed = 20.0f * dt;
+    }
+    if (IsKeyUp(KEY_LEFT_SHIFT)) {
+        moveSpeed = 5.0f * dt;
+    }
+
     // Rotate camera
     if (IsKeyDown(KEY_LEFT))  ctrl->yaw   -= rotSpeed;
     if (IsKeyDown(KEY_RIGHT)) ctrl->yaw   += rotSpeed;
@@ -34,5 +42,11 @@ void process_input(CameraControl *ctrl, float dt) {
     if (IsKeyDown(KEY_D)) {
         ctrl->position.x += right.x * moveSpeed;
         ctrl->position.z += right.z * moveSpeed;
+    }
+    if (IsKeyDown(KEY_Q)) {
+        ctrl->position.y -= moveSpeed;
+    }
+    if (IsKeyDown(KEY_E)) {
+        ctrl->position.y += moveSpeed;
     }
 }

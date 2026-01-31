@@ -18,4 +18,8 @@ void particle_integrate (Particle* particle, real duration) {
 
     // Add dampening
     v3_multiply(&particle->velocity, real_pow(particle->damping, duration));
+
+    particle->force.x = 0.0f;
+    particle->force.y = 0.0f;
+    particle->force.z = 0.0f;
 }

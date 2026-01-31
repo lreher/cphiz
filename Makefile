@@ -15,14 +15,14 @@ RAYLIB_LIBS = -L$(BREW_PREFIX)/lib \
               -framework IOKit \
               -framework CoreVideo
 
-SRCS = src/main.c src/vector.c src/particle.c src/camera.c src/input.c
-OBJS = build/main.o build/vector.o build/particle.o build/camera.o build/input.o
+SRCS = src/main.c src/vector.c src/particle.c src/camera.c src/input.c src/utils.c
+OBJS = build/main.o build/vector.o build/particle.o build/camera.o build/input.o build/utils.o
 
 program: $(OBJS)
 	$(CC) $(OBJS) -o build/program $(RAYLIB_LIBS)
 
 build/%.o: src/%.c
-	$(CC) $(CFLAGS) $(RAYLIB_CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) $(RAYLIB_CFLAGS) -Wno-unused-parameter -c $< -o $@
 
 clean:
 	rm -f build/*.o build/program

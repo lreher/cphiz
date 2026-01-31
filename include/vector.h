@@ -2,6 +2,7 @@
 #define CORE_H
 
 #include "precision.h"
+#include "raylib.h"
 
 typedef struct {
     real x;
@@ -36,10 +37,12 @@ V3 v3_get_vector_product(const V3 v1, const V3 v2);
 // Vector Utils
 void v3_invert(V3* v);
 
-real v3_maginitude(const V3* v);
+real v3_magnitude(const V3* v);
 real v3_squareMagnitude(const V3* v);
 
 void v3_normalize(V3* v);
+
+Vector3 V3_TO_RAYLIB(V3 v);
 
 void v3_print(const V3 v);
 
