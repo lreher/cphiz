@@ -1,4 +1,6 @@
 #include <stdio.h>
+
+#include "utils.h"
 #include "vector.h"
 #include "precision.h"
 
@@ -152,6 +154,20 @@ void v3_normalize(V3* v) {
 // V3 to Vector3 
 Vector3 V3_TO_RAYLIB(V3 v) {
     return (Vector3){ v.x, v.y, v.z };
+}
+
+// Random normalized Vector
+V3 v3_random_vector(void) {
+    V3 v;
+
+    do {
+        v.x = rand_float(-1.0f, 1.0f);
+        v.y = rand_float(-1.0f, 1.0f);
+        v.z = rand_float(-1.0f, 1.0f);
+    } while (v3_magnitude(&v) < 0.0001f);
+
+    v3_normalize(&v);
+    return v;
 }
 
 // PRINT

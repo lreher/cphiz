@@ -45,12 +45,9 @@ int main(void) {
     // Camera
     Camera3D cam3d = {0};
     CameraControl cameraCtrl;
-    camera_init(&cameraCtrl, &cam3d, (Vector3){0, 2, 10});
+    camera_init(&cameraCtrl, &cam3d, (Vector3){0, 2, 5});
 
     // Create Physics Particles
-    Particle p1;
-    resetParticle(&p1);
-
     Particle particles[MAX_PARTICLES];
     for (int i = 0; i < (int)particlesSlider; i++) {
         resetParticle(&particles[i]);

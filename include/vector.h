@@ -44,6 +44,8 @@ void v3_normalize(V3* v);
 
 Vector3 V3_TO_RAYLIB(V3 v);
 
+V3 v3_random_vector(void);
+
 void v3_print(const V3 v);
 
 #endif
