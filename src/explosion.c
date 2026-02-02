@@ -17,7 +17,7 @@
 #define MAX_PARTICLES 10000
 
 // Slider Values
-float explosionForceSlider = 20.0f;
+float explosionForceSlider = 100.0f;
 float particlesSlider = 100.0f;
 float sphereSizeSlider = 0.5f;
 
@@ -29,7 +29,7 @@ void resetParticle(Particle* p) {
         rand_float(explosionForceSlider / 2, explosionForceSlider),
         rand_float(-explosionForceSlider, explosionForceSlider),
     }; 
-    p->acceleration = (V3){0.0f, -1.0f, 0.0f}; // gravity
+    p->acceleration = (V3){0.0f, -9.8f, 0.0f}; // gravity
     p->damping = 0.99f;      // slight damping
 
     particle_set_mass(p, rand_float(0.5f, 2.0f)); // 0.5 - 2 kg
@@ -63,11 +63,13 @@ int main(void) {
 
     // Set FPS
     SetTargetFPS(60);
-    double lastTime = GetTime();
 
     while (!WindowShouldClose()) {
-        int numParticles = (int)particlesSlider;
+        // Get delta time
+        float dt = GetFrameTime();
 
+        int numParticles = (int)particlesSlider;
+        
         // Handle input
         if (IsKeyPressed(KEY_SPACE)) {
             for (int i = 0; i < numParticles; i++) {
@@ -75,9 +77,6 @@ int main(void) {
                 resetParticle(p);
             }
         }
-
-        // Get delta time
-        float dt = GetFrameTime();
 
         // Camera Keyboard input
         process_camera_input(&cameraCtrl, dt);
@@ -94,7 +93,7 @@ int main(void) {
         GuiSetStyle(LABEL, TEXT_COLOR_NORMAL, ColorToInt(GREEN));
 
         GuiLabel((Rectangle){ 50, 40, 100, 20 }, "Explosion Force");
-        GuiSlider((Rectangle){ 50, 60, 200, 20 }, "1", "50", &explosionForceSlider, 1.0f, 100.0f);
+        GuiSlider((Rectangle){ 50, 60, 200, 20 }, "10N", "1000N", &explosionForceSlider, 10.0f, 1000.0f);
 
         GuiLabel((Rectangle){ 50, 100, 100, 20 }, "Particles");
         GuiSlider((Rectangle){ 50, 120, 200, 20 }, "1", "10000", &particlesSlider, 1.0f, (float)MAX_PARTICLES);
@@ -111,11 +110,11 @@ int main(void) {
         for (int i = 0; i < numParticles; i++) {
             Particle *p = &particles[i];
             
-            particle_integrate(p, lastTime);
+            particle_integrate(p, dt);
 
             float radius = particle_get_mass(p) / 10.0f;
 
-            real totalSpeed = v3_magnitude(&p->velocity) * 30;
+            real totalSpeed = v3_magnitude(&p->velocity) * 15;
 
             if (totalSpeed > 255) totalSpeed = 255;
             Color color = { 255, totalSpeed, 0, 255 };

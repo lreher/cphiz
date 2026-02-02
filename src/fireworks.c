@@ -35,14 +35,6 @@ int main(void) {
     while (!WindowShouldClose()) {
         int numParticles = (int)particlesSlider;
 
-        // Handle input
-        if (IsKeyPressed(KEY_SPACE)) {
-            for (int i = 0; i < numParticles; i++) {
-                Particle *p = &particles[i];
-                resetParticle(p);
-            }
-        }
-
         // Get delta time
         float dt = GetFrameTime();
 
