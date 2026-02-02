@@ -23,3 +23,11 @@ void particle_integrate (Particle* particle, real duration) {
     particle->force.y = 0.0f;
     particle->force.z = 0.0f;
 }
+
+void particle_set_mass (Particle* particle, real mass) {
+    particle->inverseMass = 1.0f / mass;
+}
+
+real particle_get_mass (Particle* particle) {
+    return 1.0f / particle->inverseMass;
+}

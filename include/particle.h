@@ -23,4 +23,8 @@ typedef struct {
 
 void particle_integrate(Particle* particle, real duration);
 
+// Mass Get/Set
+void particle_set_mass (Particle* particle, real mass);
+real particle_get_mass (Particle* particles);
+
 #endif

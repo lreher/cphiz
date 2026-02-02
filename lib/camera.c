@@ -1,7 +1,19 @@
-#include "input.h"
+#include "camera.h"
 #include <math.h>
 
-void process_input(CameraControl *ctrl, float dt) {
+void camera_init(CameraControl *cam, Vector3 position) {
+    cam->position = position;
+    cam->yaw = 0.0f;
+    cam->pitch = 0.0f;
+}
+
+void camera_apply(Camera3D *cam3d, CameraControl *ctrl) {
+    cam3d->target.x = cam3d->position.x + sinf(ctrl->yaw);
+    cam3d->target.y = cam3d->position.y + tanf(ctrl->pitch); // small vertical look
+    cam3d->target.z = cam3d->position.z - cosf(ctrl->yaw);
+}
+
+void process_camera_input(CameraControl *ctrl, float dt) {
     float moveSpeed = 5.0f * dt;
     float rotSpeed  = 1.5f * dt;
 

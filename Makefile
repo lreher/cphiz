@@ -3,10 +3,10 @@ CC = clang
 # Compiler flags
 CFLAGS = -Iinclude -Wall -Wextra -std=c11 -Wno-deprecated-declarations
 
-# Homebrew prefix (works on Intel + Apple Silicon)
+# Homebrew prefix
 BREW_PREFIX := $(shell brew --prefix)
 
-# GLFW include & link flags
+# Raylib flags
 RAYLIB_CFLAGS = -I$(BREW_PREFIX)/include
 RAYLIB_LIBS = -L$(BREW_PREFIX)/lib \
               -lraylib \
@@ -15,14 +15,31 @@ RAYLIB_LIBS = -L$(BREW_PREFIX)/lib \
               -framework IOKit \
               -framework CoreVideo
 
-SRCS = src/main.c src/vector.c src/particle.c src/camera.c src/input.c src/utils.c
-OBJS = build/main.o build/vector.o build/particle.o build/camera.o build/input.o build/utils.o
+# Output folders
+OBJDIR = build/objects
+BINDIR = build/programs
 
-program: $(OBJS)
-	$(CC) $(OBJS) -o build/program $(RAYLIB_LIBS)
+# Library code (no main)
+LIB_SRCS = lib/vector.c lib/particle.c lib/camera.c lib/utils.c
+LIB_OBJS = $(LIB_SRCS:lib/%.c=$(OBJDIR)/lib_%.o)
 
-build/%.o: src/%.c
-	$(CC) $(CFLAGS) $(RAYLIB_CFLAGS) -Wno-unused-parameter -c $< -o $@
+# Demos (each has a main)
+DEMOS = explosion fireworks
+
+# Default target
+all: $(DEMOS)
+
+# Build each demo
+$(DEMOS): %: src/%.c $(LIB_OBJS)
+	@mkdir -p $(BINDIR)
+	$(CC) $(CFLAGS) $(RAYLIB_CFLAGS) $< $(LIB_OBJS) \
+		-o $(BINDIR)/$@ $(RAYLIB_LIBS)
+
+# Compile library object files
+$(OBJDIR)/lib_%.o: lib/%.c
+	@mkdir -p $(OBJDIR)
+	$(CC) $(CFLAGS) $(RAYLIB_CFLAGS) -Wno-unused-parameter \
+		-c $< -o $@
 
 clean:
-	rm -f build/*.o build/program
+	rm -rf build
