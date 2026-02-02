@@ -43,14 +43,9 @@ int main(void) {
     InitWindow(1200, 800, "Physics Demo - Explosion");
 
     // Camera
-    CameraControl cameraCtrl;
-    camera_init(&cameraCtrl, (Vector3){0, 2, 10});
-
     Camera3D cam3d = {0};
-    cam3d.position = cameraCtrl.position;
-    cam3d.up       = (Vector3){0,1,0};
-    cam3d.fovy     = 60.0f;
-    cam3d.projection = CAMERA_PERSPECTIVE;
+    CameraControl cameraCtrl;
+    camera_init(&cameraCtrl, &cam3d, (Vector3){0, 2, 10});
 
     // Create Physics Particles
     Particle p1;
@@ -78,12 +73,9 @@ int main(void) {
             }
         }
 
-        // Camera Keyboard input
+        // Set camera & handle input
         process_camera_input(&cameraCtrl, dt);
-
-        // Apply camera
-        cam3d.position = cameraCtrl.position;
-        camera_apply(&cam3d, &cameraCtrl);
+        camera_apply_control(&cam3d, &cameraCtrl);
 
         /* Render */ 
         BeginDrawing();

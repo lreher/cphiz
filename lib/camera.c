@@ -1,13 +1,20 @@
 #include "camera.h"
 #include <math.h>
 
-void camera_init(CameraControl *cam, Vector3 position) {
-    cam->position = position;
-    cam->yaw = 0.0f;
-    cam->pitch = 0.0f;
+void camera_init(CameraControl *ctrl, Camera3D *cam3d, Vector3 position) {
+    ctrl->position = position;
+    ctrl->yaw = 0.0f;
+    ctrl->pitch = 0.0f;
+
+    cam3d->position = position;
+    cam3d->up       = (Vector3){0,1,0};
+    cam3d->fovy     = 60.0f;
+    cam3d->projection = CAMERA_PERSPECTIVE;
 }
 
-void camera_apply(Camera3D *cam3d, CameraControl *ctrl) {
+void camera_apply_control(Camera3D *cam3d, CameraControl *ctrl) {
+    cam3d->position = ctrl->position;
+
     cam3d->target.x = cam3d->position.x + sinf(ctrl->yaw);
     cam3d->target.y = cam3d->position.y + tanf(ctrl->pitch); // small vertical look
     cam3d->target.z = cam3d->position.z - cosf(ctrl->yaw);
