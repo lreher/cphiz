@@ -10,6 +10,10 @@ float rand_float(float min, float max) {
     return min + ((float)rand() / (float)RAND_MAX) * (max - min);
 }
 
+float rand_int(int min, int max) {
+    return min + rand() % (max - min + 1);
+}
+
 float log_map(float t, float min, float max) {
     // t in [0,1]
     float logMin = logf(min);

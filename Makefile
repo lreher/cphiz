@@ -1,15 +1,14 @@
 CC = clang
 
 # Compiler flags
-CFLAGS = -Iinclude -Wall -Wextra -std=c11 -Wno-deprecated-declarations
+CFLAGS = -Iinclude -Wall -Wextra -std=c11 -Wno-deprecated-declarations 
 
 # Homebrew prefix
 BREW_PREFIX := $(shell brew --prefix)
 
 # Raylib flags
 RAYLIB_CFLAGS = -I$(BREW_PREFIX)/include
-RAYLIB_LIBS = -L$(BREW_PREFIX)/lib \
-              -lraylib \
+RAYLIB_LIBS = $(BREW_PREFIX)/lib/libraylib.a \
               -framework OpenGL \
               -framework Cocoa \
               -framework IOKit \
@@ -38,7 +37,7 @@ $(DEMOS): %: src/%.c $(LIB_OBJS)
 # Compile library object files
 $(OBJDIR)/lib_%.o: lib/%.c
 	@mkdir -p $(OBJDIR)
-	$(CC) $(CFLAGS) $(RAYLIB_CFLAGS) -Wno-unused-parameter \
+	$(CC) $(CFLAGS) $(RAYLIB_CFLAGS) \
 		-c $< -o $@
 
 clean:

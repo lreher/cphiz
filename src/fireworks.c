@@ -37,6 +37,7 @@ typedef struct ExplosionParticle {
     float startingLife; // seconds given
     float life;   // seconds remaining
     bool active;  // is it alive?
+    Color color;
 } ExplosionParticle;
 
 // Create Explosion Particles
@@ -65,6 +66,13 @@ void shootRocket (Rocket* rocket) {
 // Bad
 int particle_index = 0;
 void explode (V3 position) {
+    Color explosionColor = (Color){ 
+        rand_int(0,255), 
+        rand_int(0,255), 
+        rand_int(0,255), 
+        255
+    };
+
     for (int i = particle_index; i < particle_index + EXPLOSION_PARTICLES; i++) {
         ExplosionParticle *ep = &explosionParticles[i];
         ep->active = true;
@@ -77,9 +85,11 @@ void explode (V3 position) {
         
         ep->particle.position = position;
         // ep->particle.acceleration = (V3){rand_float(-5.0f, 5.0f), rand_float(-5.0f, 5.0f), rand_float(-5.0f, 5.0f)};
-        ep->particle.acceleration = (V3){0.0f, -9.8f, 0.0f};
+        ep->particle.acceleration = (V3){0.0f, -6.0f, 0.0f};
         ep->particle.damping = rand_float(0.2, 0.98);
 
+        // Set random color if we want random color mode
+        ep->color = explosionColor;
         particle_set_mass(&ep->particle, 0.1f);
     }
 
@@ -104,6 +114,9 @@ int main(void) {
     Camera3D cam3d = {0};
     CameraControl cameraCtrl;
     camera_init(&cameraCtrl, &cam3d, (Vector3){0, 20, 40});
+
+    // Background
+    Color backgroundColor = BLACK;
 
     // Create Rockets
     Rocket rockets[MAX_ROCKETS];
@@ -188,7 +201,8 @@ int main(void) {
 
         /* Render */ 
         BeginDrawing();
-        ClearBackground(BLACK);
+        backgroundColor.a = 50;
+        ClearBackground(backgroundColor);
 
         // Labels
         GuiSetStyle(LABEL, TEXT_COLOR_NORMAL, ColorToInt(GREEN));
@@ -203,26 +217,44 @@ int main(void) {
         GuiLabel((Rectangle){ 340, 160, 100, 20 }, "Rocket Speed");
         GuiSlider((Rectangle){ 340, 180, 200, 20 }, "1", "100", &rocketSpeedSlider, 0.5f, 4.0f);
 
-        GuiColorPicker((Rectangle){ 50, 40, 200, 200 }, "Firework Color", &fireworkColor);
+        GuiColorPicker((Rectangle){ 50, 40, 100, 100 }, "Firework Color", &fireworkColor);
+        GuiColorPicker((Rectangle){ 50, 150, 100, 100 }, "Background Color", &backgroundColor);
 
         BeginMode3D(cam3d);
 
-        // Mesh sphere = GenMeshSphere(1.0f, 8, 8); // low res
-        // Model sphereModel = LoadModelFromMesh(sphere);
+            // If you want the rockets to show up
+            // Draw Rockets
+            Mesh sphere = GenMeshSphere(1.0f, 8, 8); // low res
+            Model sphereModel = LoadModelFromMesh(sphere);
 
-            // // Draw Rockets
-            // for (int i = 0; i < MAX_ROCKETS; i++) {
-            //     if (!rockets[i].active) continue;
+            for (int i = 0; i < MAX_ROCKETS; i++) {
+                if (!rockets[i].active) continue;
 
-            //     DrawModel(
-            //         sphereModel,
-            //         V3_TO_RAYLIB(rockets[i].particle.position),
-            //         0.01f,
-            //         WHITE
-            //     );
-            // }
+                DrawModel(
+                    sphereModel,
+                    V3_TO_RAYLIB(rockets[i].particle.position),
+                    0.01f,
+                    WHITE
+                );
+            }
 
-            // Draw Explosion Particles
+            // Draw Explosion Particles (Twice for better blending)
+            BeginBlendMode(BLEND_ALPHA); // make it look snazzy
+            for (int i = 0; i < MAX_EXPLOSION_PARTICLES; i++) {
+                ExplosionParticle *ep = &explosionParticles[i];
+                if (!ep->active) continue;
+
+                DrawBillboard(
+                    cam3d,
+                    particleTexture,
+                    V3_TO_RAYLIB(ep->particle.position),
+                    0.06f,   // 0.1 * 0.6
+                    BLACK
+                );
+            }
+            EndBlendMode();
+
+
             BeginBlendMode(BLEND_ADDITIVE); // make it look snazzy
             for (int i = 0; i < MAX_EXPLOSION_PARTICLES; i++) {
                 ExplosionParticle *ep = &explosionParticles[i];
@@ -233,12 +265,14 @@ int main(void) {
                 Color color = fireworkColor;
                 color.a = (unsigned char)(255 * t);   // fade over lifetime
 
+                // ep->color.a = (unsigned char)(255 * t);   // fade over lifetime
+
                 DrawBillboard(
                     cam3d,
                     particleTexture,
                     V3_TO_RAYLIB(ep->particle.position),
                     0.1f,   // e.g. 0.1f
-                    color
+                    color //ep->color
                 );
             }
             EndBlendMode();
@@ -249,6 +283,15 @@ int main(void) {
         EndMode3D();
         
         DrawText("Fireworks Physics Demo", 10, 10, 20, GREEN);
+
+        // int particleCount = 0;
+        // for (int i = 0; i < MAX_EXPLOSION_PARTICLES; i++) {
+        //     ExplosionParticle *ep = &explosionParticles[i];
+        //     if (!ep->active) continue;
+        //     particleCount++;
+        // }
+
+        // DrawText(TextFormat("Particles: %d", particleCount), 10, 800, 20, GREEN);
 
         EndDrawing();
     }

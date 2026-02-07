@@ -6,6 +6,7 @@
 
 void init_random(void);
 float rand_float(float min, float max);
+int rand_int(int min, int max);
 
 float log_map(float t, float min, float max);
 float inv_log_map(float v, float min, float max);
